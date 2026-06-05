@@ -15,12 +15,15 @@ const BOARD_COLLECTION_CHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
-
+const validateBeforeCreate = async (data) => {
+  return await BOARD_COLLECTION_CHEMA.validateAsync(data, { abortEarly: false })
+}
 const createNew = async (data) => {
   try {
+    const validData = await validateBeforeCreate(data)
     const createdBoard = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)
-      .insertOne(data)
+      .insertOne(validData)
     return createdBoard
   } catch (error) {
     throw new Error(error)

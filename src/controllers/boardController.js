@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/utils/ApiError'
 import { boardService } from '~/services/boardService'
+import { ObjectId } from 'mongodb'
 const createNew = async (req, res, next) => {
   try {
     const createdBoard = await boardService.createNew(req.body)
@@ -9,6 +10,17 @@ const createNew = async (req, res, next) => {
     next(error) // nếu truyền tham số error vào next thì sẽ nhảy vào xử lý lỗi tập  trung
   }
 }
+
+const getDetails = async (req, res, next) => {
+  try {
+    const boardId = req.params.id
+    const board = await boardService.getDetails(new ObjectId(boardId))
+    res.status(StatusCodes.OK).json(board)
+  } catch (error) {
+    next(error) // nếu truyền tham số error vào next thì sẽ nhảy vào xử lý lỗi tập  trung
+  }
+}
 export const boardController = {
-  createNew
+  createNew,
+  getDetails
 }

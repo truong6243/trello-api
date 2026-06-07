@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import express, { json } from 'express'
 import cors from 'cors'
-import {corsOptions} from '~/config/cors'
+import { corsOptions } from '~/config/cors'
 import exitHook from 'async-exit-hook'
 import { env } from '~/config/environment'
 import { CONNECT_DB } from '~/config/mongodb'

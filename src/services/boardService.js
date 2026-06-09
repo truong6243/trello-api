@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes'
 import { cloneDeep } from 'lodash'
 
 const createNew = async (reqBody) => {
+  // eslint-disable-next-line no-useless-catch
   try {
     const newBoard = {
       ...reqBody,
@@ -17,11 +18,12 @@ const createNew = async (reqBody) => {
     // trả về kết quả, trong service luôn phải return
     return getNewBoard
   } catch (error) {
-    // throw error
+    throw error
   }
 }
 
 const getDetails = async (boardId) => {
+  // eslint-disable-next-line no-useless-catch
   try {
     const board = await boardModel.getDetails(boardId)
     if (!board) {
@@ -36,7 +38,7 @@ const getDetails = async (boardId) => {
     delete resBoard.cards
     return resBoard
   } catch (error) {
-    //
+    throw error
   }
 }
 export const boardService = { createNew, getDetails }

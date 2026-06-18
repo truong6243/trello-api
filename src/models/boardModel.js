@@ -4,6 +4,7 @@ import { GET_DB } from '~/config/mongodb'
 import { BOARD_TYPE } from '~/utils/constants'
 import { columnModel } from '~/models/columnModel'
 import { cardModel } from '~/models/cardModel'
+import { ObjectId, ReturnDocument } from 'mongodb'
 
 const BOARD_COLLECTION_NAME = 'boards'
 const BOARD_COLLECTION_CHEMA = Joi.object({
@@ -73,18 +74,34 @@ const getDetails = async (id) => {
             as: 'cards'
           }
         }
-      ]).toArray()
-      // eslint-disable-next-line indent
+      ])
+      .toArray()
+    // eslint-disable-next-line indent
     return result[0] || null
   } catch (error) {
     throw new Error(error)
   }
 }
 
+const pushColumnOrderIds = async (column) => {
+  try {
+    const result = await GET_DB()
+      .collection(BOARD_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(column.boardId) },
+        { $push: { columnOrderIds: new ObjectId(column._id) } },
+        { returnDocument: 'after' }
+      )
+    return result.value
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_CHEMA,
   createNew,
   findOnebyId,
-  getDetails
+  getDetails,
+  pushColumnOrderIds
 }

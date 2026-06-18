@@ -18,7 +18,7 @@ const createNew = async (req, res, next) => {
     // validate dữ liệu xong thì chuyển sang controller
     next()
   } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, 'Invalid request data')) // nhảy vào xử lý lỗi tập trung
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)) // nhảy vào xử lý lỗi tập trung
   }
 }
 export const boardValidation = {

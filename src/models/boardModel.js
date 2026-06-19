@@ -4,7 +4,7 @@ import { GET_DB } from '~/config/mongodb'
 import { BOARD_TYPE } from '~/utils/constants'
 import { columnModel } from '~/models/columnModel'
 import { cardModel } from '~/models/cardModel'
-import { ObjectId, ReturnDocument } from 'mongodb'
+import { ObjectId } from 'mongodb'
 
 const BOARD_COLLECTION_NAME = 'boards'
 const BOARD_COLLECTION_CHEMA = Joi.object({
@@ -20,9 +20,13 @@ const BOARD_COLLECTION_CHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
+
+const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
+
 const validateBeforeCreate = async (data) => {
   return await BOARD_COLLECTION_CHEMA.validateAsync(data, { abortEarly: false })
 }
+
 const createNew = async (data) => {
   try {
     const validData = await validateBeforeCreate(data)
@@ -30,6 +34,28 @@ const createNew = async (data) => {
       .collection(BOARD_COLLECTION_NAME)
       .insertOne(validData)
     return createdBoard
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const update = async (boardId, updateData) => {
+  console.log('updateData', updateData)
+  Object.keys(updateData).forEach((fieldName) => {
+    if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+      delete updateData[fieldName]
+    }
+  })
+  try {
+    const updateBoard = await GET_DB()
+      .collection(BOARD_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(boardId) },
+        { $set: updateData },
+        { returnDocument: 'after' }
+      )
+    console.log('updateBoard from model', updateBoard)
+    return updateBoard
   } catch (error) {
     throw new Error(error)
   }
@@ -92,7 +118,7 @@ const pushColumnOrderIds = async (column) => {
         { $push: { columnOrderIds: new ObjectId(column._id) } },
         { returnDocument: 'after' }
       )
-    return result.value
+    return result
   } catch (error) {
     throw new Error(error)
   }
@@ -101,6 +127,7 @@ export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_CHEMA,
   createNew,
+  update,
   findOnebyId,
   getDetails,
   pushColumnOrderIds

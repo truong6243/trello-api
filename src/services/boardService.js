@@ -5,7 +5,6 @@ import { StatusCodes } from 'http-status-codes'
 import { cloneDeep } from 'lodash'
 
 const createNew = async (reqBody) => {
-  // eslint-disable-next-line no-useless-catch
   try {
     const newBoard = {
       ...reqBody,
@@ -17,6 +16,19 @@ const createNew = async (reqBody) => {
     const getNewBoard = boardModel.findOnebyId(createdBoard.insertedId)
     // trả về kết quả, trong service luôn phải return
     return getNewBoard
+  } catch (error) {
+    throw error
+  }
+}
+
+const update = async (boardId, reqBody) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: Date.now()
+    }
+    const updatedBoard = await boardModel.update(boardId, updateData)
+    return updatedBoard
   } catch (error) {
     throw error
   }
@@ -41,4 +53,4 @@ const getDetails = async (boardId) => {
     throw error
   }
 }
-export const boardService = { createNew, getDetails }
+export const boardService = { createNew, update, getDetails }

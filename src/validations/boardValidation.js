@@ -18,9 +18,33 @@ const createNew = async (req, res, next) => {
     // validate dữ liệu xong thì chuyển sang controller
     next()
   } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)) // nhảy vào xử lý lỗi tập trung
+    next(
+      new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    ) // nhảy vào xử lý lỗi tập trung
   }
 }
+
+const update = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    title: Joi.string().min(3).max(50).trim().strict(),
+    description: Joi.string().min(3).max(256).trim().strict(),
+    type: Joi.string().valid(BOARD_TYPE.PUBLIC, BOARD_TYPE.PRIVATE)
+  })
+  try {
+    await correctCondition.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true
+    })
+    // validate dữ liệu xong thì chuyển sang controller
+    next()
+  } catch (error) {
+    next(
+      new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    ) // nhảy vào xử lý lỗi tập trung
+  }
+}
+
 export const boardValidation = {
-  createNew
+  createNew,
+  update
 }

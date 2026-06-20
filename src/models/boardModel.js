@@ -40,7 +40,6 @@ const createNew = async (data) => {
 }
 
 const update = async (boardId, updateData) => {
-  console.log('updateData', updateData)
   Object.keys(updateData).forEach((fieldName) => {
     if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
       delete updateData[fieldName]
@@ -54,7 +53,6 @@ const update = async (boardId, updateData) => {
         { $set: updateData },
         { returnDocument: 'after' }
       )
-    console.log('updateBoard from model', updateBoard)
     return updateBoard
   } catch (error) {
     throw new Error(error)

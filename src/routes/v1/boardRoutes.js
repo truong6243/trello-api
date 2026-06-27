@@ -9,6 +9,12 @@ Router.route('/')
     res.status(StatusCodes.OK).json({ message: 'Get API' })
   })
   .post(boardValidation.createNew, boardController.createNew)
+
+Router.route('/supports/moving_card').put(
+  boardValidation.moveCardToDifferentColumn,
+  boardController.moveCardToDifferentColumn
+)
+
 Router.route('/:id')
   .get(boardController.getDetails)
   .put(boardValidation.update, boardController.update)

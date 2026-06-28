@@ -15,11 +15,20 @@ const START_SERVER = () => {
   app.use('/v1', APIs_V1)
   //middleware xử lý lỗi tập trung
   app.use(errorHandlingMiddleware)
-  app.listen(env.APP_PORT, env.APP_HOST, () => {
-    console.log(
-      `Hello ${env.AUTHOR}, I am running at http://${env.APP_HOST}:${env.APP_PORT}/`
-    )
-  })
+  if (env.BUILD_MODE === 'production') {
+    app.listen(process.env.PORT, () => {
+      console.log(
+        `Hello ${env.AUTHOR}, I am running at http://${env.APP_HOST}:${process.env.PORT}/`
+      )
+    })
+  } else {
+    app.listen(env.LOCAL_DEV_APP_PORT, env.LOCAL_DEV_APP_HOST, () => {
+      console.log(
+        `Hello ${env.AUTHOR}, I am running at http://${env.LOCAL_DEV_APP_HOST}:${env.LOCAL_DEV_APP_PORT}/`
+      )
+    })
+  }
+
   exitHook(() => {
     console.log('Exit App')
   })

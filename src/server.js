@@ -18,7 +18,7 @@ const START_SERVER = () => {
   if (env.BUILD_MODE === 'production') {
     app.listen(process.env.PORT, () => {
       console.log(
-        `Hello ${env.AUTHOR}, I am running at http://${env.APP_HOST}:${process.env.PORT}/`
+        `Hello ${env.AUTHOR}, I am running at :${process.env.PORT}/`
       )
     })
   } else {

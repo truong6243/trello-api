@@ -46,7 +46,7 @@ const createNew = async (data) => {
 const findOnebyId = async (id) => {
   try {
     const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOne({
-      _id: id // _id ở đây là ObjectId, nếu không phải (kể cả là strring) thì sẽ là null
+      _id: new ObjectId(id)
     })
     return result
   } catch (error) {
@@ -77,7 +77,9 @@ const update = async (columnId, updateData) => {
   })
   try {
     if (updateData.cardOrderIds) {
-      updateData.cardOrderIds = updateData.cardOrderIds.map(_id => new ObjectId(_id))
+      updateData.cardOrderIds = updateData.cardOrderIds.map(
+        (_id) => new ObjectId(_id)
+      )
     }
     const updateColumn = await GET_DB()
       .collection(COLUMN_COLLECTION_NAME)
@@ -92,11 +94,23 @@ const update = async (columnId, updateData) => {
   }
 }
 
+const deleteOneById = async (columnId) => {
+  try {
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).deleteOne({
+      _id: new ObjectId(columnId)
+    })
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOnebyId,
   pushCardOrderIds,
-  update
+  update,
+  deleteOneById
 }

@@ -47,7 +47,7 @@ const update = async (boardId, updateData) => {
   })
   try {
     if (updateData.columnOrderIds) {
-      updateData.columnOrderIds = updateData.columnOrderIdsv.map(_id => new ObjectId(_id))
+      updateData.columnOrderIds = updateData.columnOrderIds.map(_id => new ObjectId(_id))
     }
     const updateBoard = await GET_DB()
       .collection(BOARD_COLLECTION_NAME)

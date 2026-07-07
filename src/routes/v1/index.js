@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes'
 import { boardRoute } from './boardRoutes'
 import { columnRoute } from '~/routes/v1/columnRoutes'
 import { cardRoute } from '~/routes/v1/cardRoutes'
+import { userRoute } from '~/routes/v1/userRouters'
+
 const Router = express.Router()
 
 Router.get('/status', (req, res) => {
@@ -10,8 +12,14 @@ Router.get('/status', (req, res) => {
 })
 // Board API
 Router.use('/boards', boardRoute)
+
 // Column API
 Router.use('/columns', columnRoute)
+
 // Card API
 Router.use('/cards', cardRoute)
+
+// User API
+Router.use('/users', userRoute)
+
 export const APIs_V1 = Router

@@ -4,6 +4,7 @@ import ApiError from '~/utils/ApiError'
 import bcryptjs from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { pickUser } from '~/utils/formatters'
+import { MailerSendProvider } from '~/providers/MailerSendProvider'
 
 const createNew = async (reqBody) => {
   try {
@@ -21,9 +22,23 @@ const createNew = async (reqBody) => {
       displayName: nameFromEmail,
       verifyToken: uuidv4()
     })
-    // gửi email để cho người dùng xác thực
-    // return data đã lưu vào trong DB
     const getNewUser = await userModel.findOnebyId(createdUser.insertedId)
+    // gửi email để cho người dùng xác thực
+    const verificatonLink = `http://localhost:5173/account/verifycation?email=${getNewUser.email}&token=${getNewUser.verifyToken}`
+    const customSubject =
+      'Create account successfully: Please verify email before using our services'
+    const htmlContent = `
+      <h1> Welcome ${getNewUser.username}</h1>
+      <h3>Here is your verificaton link: </h3>
+      <h3>${verificatonLink} </h3>
+    `
+    await MailerSendProvider.sendEmail(
+      getNewUser.email,
+      getNewUser.username,
+      customSubject,
+      htmlContent
+    )
+    // return data đã lưu vào trong DB
     return pickUser(getNewUser)
   } catch (error) {
     throw error

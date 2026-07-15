@@ -45,4 +45,20 @@ const createNew = async (reqBody) => {
   }
 }
 
-export const userService = { createNew }
+const verifyAccount = async (reqBody) => {
+  try {
+    
+  } catch (error) {
+    throw error
+  }
+}
+
+const login = async (reqBody) => {
+  try {
+    
+  } catch (error) {
+    throw error
+  }
+}
+
+export const userService = { createNew, verifyAccount, login }

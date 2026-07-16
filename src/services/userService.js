@@ -24,7 +24,7 @@ const createNew = async (reqBody) => {
     })
     const getNewUser = await userModel.findOnebyId(createdUser.insertedId)
     // gửi email để cho người dùng xác thực
-    const verificatonLink = `http://localhost:5173/account/verifycation?email=${getNewUser.email}&token=${getNewUser.verifyToken}`
+    const verificatonLink = `http://localhost:5173/account/verification?email=${getNewUser.email}&token=${getNewUser.verifyToken}`
     const customSubject =
       'Create account successfully: Please verify email before using our services'
     const htmlContent = `

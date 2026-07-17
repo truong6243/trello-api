@@ -5,6 +5,8 @@ import bcryptjs from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { pickUser } from '~/utils/formatters'
 import { MailerSendProvider } from '~/providers/MailerSendProvider'
+import { env } from '~/config/environment'
+import { JwtProvider } from '~/providers/JwtProvider'
 
 const createNew = async (reqBody) => {
   try {
@@ -47,7 +49,20 @@ const createNew = async (reqBody) => {
 
 const verifyAccount = async (reqBody) => {
   try {
-    
+    const exitsUser = await userModel.findOnebyEmail(reqBody.email)
+    if (!exitsUser)
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
+    if (exitsUser.isActive)
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is alredy active')
+    if (reqBody.token !== exitsUser.verifyToken)
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Token is invalid!')
+    // Nếu như mọi thứ oke thì update lại thông tin của user
+    const updateData = {
+      isActive: true,
+      verifyToken: null
+    }
+    const updatedUser = await userModel.update(exitsUser._id, updateData)
+    return pickUser(updatedUser)
   } catch (error) {
     throw error
   }
@@ -55,7 +70,33 @@ const verifyAccount = async (reqBody) => {
 
 const login = async (reqBody) => {
   try {
-    
+    const exitsUser = await userModel.findOnebyEmail(reqBody.email)
+    if (!exitsUser)
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
+    if (!exitsUser.isActive)
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not active')
+    if (!bcryptjs.compareSync(reqBody.password, exitsUser.password))
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Email or password is incorrect')
+    // Nếu mọi thứ ok thì bắt đầu tạo Token đăng nhập để trả về cho phía FE
+    // Tạo thông tin để đính kèm trong JWT Token bao gồm _id và email của user
+    const userInfo = {
+      _id: exitsUser._id,
+      email: exitsUser.email
+    }
+
+    // Tạo ra 2 loại accessToken và refreshToken
+    const accessToken = await JwtProvider.generateToken(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_LIFE
+    )
+
+    const refreshToken = await JwtProvider.generateToken(
+      userInfo,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE,
+      env.REFRESH_TOKEN_LIFE
+    )
+    return { accessToken, refreshToken, ...pickUser(exitsUser) }
   } catch (error) {
     throw error
   }

@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { userService } from '~/services/userService'
-import { env } from '~/config/environment'
 import ms from 'ms'
+import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
   try {
@@ -35,12 +35,11 @@ const login = async (req, res, next) => {
       maxAge: ms('14 days')
       // env.ACCESS_TOKEN_LIFE
     })
-    res.cookie('refreshToken', result.accessToken, {
+    res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: ms('14 days')
-      // env.ACCESS_TOKEN_LIFE
     })
     res.status(StatusCodes.CREATED).json(result)
   } catch (error) {
@@ -48,4 +47,30 @@ const login = async (req, res, next) => {
   }
 }
 
-export const userController = { createNew, verifyAccount, login }
+const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('accessToken')
+    res.clearCookie('refreshToken')
+
+    res.status(StatusCodes.OK).json({ loggedOut: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const refreshToken = (req, res, next) => {
+  try {
+    const result = userService.refreshToken(req.cookies?.refreshToken)
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days')
+    })
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(new ApiError(StatusCodes.FORBIDDEN, 'Please Sign In'))
+  }
+}
+
+export const userController = { createNew, verifyAccount, login, logout, refreshToken }

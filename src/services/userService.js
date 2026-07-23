@@ -53,7 +53,10 @@ const verifyAccount = async (reqBody) => {
     if (!exitsUser)
       throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
     if (exitsUser.isActive)
-      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is alredy active')
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        'Your account is alredy active'
+      )
     if (reqBody.token !== exitsUser.verifyToken)
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Token is invalid!')
     // Nếu như mọi thứ oke thì update lại thông tin của user
@@ -74,9 +77,15 @@ const login = async (reqBody) => {
     if (!exitsUser)
       throw new ApiError(StatusCodes.NOT_FOUND, 'Account not found!')
     if (!exitsUser.isActive)
-      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not active')
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        'Your account is not active'
+      )
     if (!bcryptjs.compareSync(reqBody.password, exitsUser.password))
-      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Email or password is incorrect')
+      throw new ApiError(
+        StatusCodes.NOT_ACCEPTABLE,
+        'Email or password is incorrect'
+      )
     // Nếu mọi thứ ok thì bắt đầu tạo Token đăng nhập để trả về cho phía FE
     // Tạo thông tin để đính kèm trong JWT Token bao gồm _id và email của user
     const userInfo = {
@@ -88,12 +97,14 @@ const login = async (reqBody) => {
     const accessToken = await JwtProvider.generateToken(
       userInfo,
       env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      // 5
       env.ACCESS_TOKEN_LIFE
     )
 
     const refreshToken = await JwtProvider.generateToken(
       userInfo,
       env.REFRESH_TOKEN_SECRET_SIGNATURE,
+      // 15
       env.REFRESH_TOKEN_LIFE
     )
     return { accessToken, refreshToken, ...pickUser(exitsUser) }
@@ -102,4 +113,29 @@ const login = async (reqBody) => {
   }
 }
 
-export const userService = { createNew, verifyAccount, login }
+const refreshToken = (clientRefreshToken) => {
+  try {
+    // verify token xem có hợp lệ không
+    const refreshTokenDecoded = JwtProvider.verifyToken(
+      clientRefreshToken,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE
+    )
+
+    const InfoUser = {
+      _id: refreshTokenDecoded._id,
+      email: refreshTokenDecoded.email
+    }
+    // Tạo accessToken mới
+    const accessToken = JwtProvider.generateToken(
+      InfoUser,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      // 5
+      env.ACCESS_TOKEN_LIFE
+    )
+    return { accessToken }
+  } catch (error) {
+    throw error
+  }
+}
+
+export const userService = { createNew, verifyAccount, login, refreshToken }

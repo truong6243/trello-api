@@ -20,7 +20,6 @@ const sendEmail = async (to, toName, subject, html) => {
     const data = await mailerSendInstance.email.send(emailParams)
     return data
   } catch (error) {
-    console.log('MailerSendProvider.sendEmail error: ', error)
     throw error
   }
 }
